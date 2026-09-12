@@ -4,7 +4,7 @@
   "description": "CLI project AD",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsx index.jsx"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@babel/core": "^8.0.5",
     "@babel/preset-react": "^8.0.1",
-    "@babel/register": "^8.0.5"
+    "@babel/register": "^8.0.5",
+    "tsx": "^4.23.13"
   }
 }
