@@ -13,9 +13,19 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/joddcodes07/cli-project-ad/issues"
   },
-  "homepage": "https://github.com/joddcodes07/cli-project-ad#readme"
+  "homepage": "https://github.com/joddcodes07/cli-project-ad#readme",
+  "dependencies": {
+    "ink": "^7.1.1",
+    "music-metadata": "^11.15.0",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.5",
+    "@babel/preset-react": "^8.0.1",
+    "@babel/register": "^8.0.5"
+  }
 }
