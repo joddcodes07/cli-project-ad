@@ -1,1 +1,1 @@
-CLI project AD
+Terminal Music Player Application
