@@ -17,13 +17,44 @@ const App = () => {
     const [currentPlaying, setCurrentPlaying] = useState(null);
     const [trackInfo, setTrackInfo] = useState(null);
     const [isPaused, setIsPaused] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0); // New state for progress
 
     useEffect(() => {
         setSongs(getSongs());
     }, []);
 
-   
-    useInput(async (input, key) => {
+    // The Timer: Ticks up 1 second at a time while playing
+    useEffect(() => {
+        let interval;
+        if (currentPlaying && !isPaused) {
+            interval = setInterval(() => {
+                setCurrentTime((prev) => prev + 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [currentPlaying, isPaused]);
+
+    const handlePlayTrack = async (index) => {
+        if (songs.length === 0) return;
+        const selected = songs[index];
+        const filePath = `./songs/${selected}`;
+        
+        setCurrentPlaying(selected);
+        setSelectedIndex(index);
+        setIsPaused(false);
+        setCurrentTime(0); // Reset progress
+        
+        const info = await getTrackInfo(filePath);
+        setTrackInfo(info);
+
+        playSong(filePath, () => {
+            // Auto-Next Logic when song finishes naturally
+            const nextIndex = index + 1 < songs.length ? index + 1 : 0;
+            handlePlayTrack(nextIndex);
+        });
+    };
+
+    useInput((input, key) => {
         if (input === 'q') {
             stopSong();
             process.exit(0);
@@ -33,7 +64,6 @@ const App = () => {
         if (key.upArrow) setSelectedIndex(prev => (prev > 0 ? prev - 1 : songs.length - 1));
         if (key.downArrow) setSelectedIndex(prev => (prev < songs.length - 1 ? prev + 1 : 0));
         
-        // Spacebar to pause/play
         if (input === ' ') {
             if (currentPlaying) {
                 const paused = togglePause();
@@ -42,23 +72,11 @@ const App = () => {
         }
         
         if (key.return) {
-            const selected = songs[selectedIndex];
-            const filePath = `./songs/${selected}`;
-            
-            setCurrentPlaying(selected);
-            setIsPaused(false);
-            
-            // Fetch metadata before playing
-            const info = await getTrackInfo(filePath);
-            setTrackInfo(info);
-
-            playSong(filePath, () => {
-                setCurrentPlaying(null);
-                setTrackInfo(null);
-                setIsPaused(false);
-            });
+            handlePlayTrack(selectedIndex);
         }
     });
+
+    const duration = trackInfo ? trackInfo.duration : 0;
 
     return (
         <Layout>
@@ -67,7 +85,7 @@ const App = () => {
                 <QueueList songs={songs} selectedIndex={selectedIndex} currentPlaying={currentPlaying} />
                 <NowPlaying currentPlaying={currentPlaying} trackInfo={trackInfo} isPaused={isPaused} />
             </Box>
-            <ProgressBar />
+            <ProgressBar currentTime={currentTime} duration={duration} />
             <KeyboardLegend />
         </Layout>
     );
