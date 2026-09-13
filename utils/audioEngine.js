@@ -1,25 +1,38 @@
 import { spawn } from 'child_process';
 
 let currentProcess = null;
+let isPaused = false;
 
 export const playSong = (filePath, onFinish) => {
-    // Kill any currently playing track before starting a new one
     stopSong();
-
-    // Spawning macOS afplay (can be swapped to 'mpv' or 'ffplay' later for cross-platform)
+    isPaused = false;
     currentProcess = spawn('afplay', [filePath]);
 
     currentProcess.on('close', (code, signal) => {
-        // If the process ends naturally (not killed manually via SIGTERM)
-        if (signal !== 'SIGTERM' && onFinish) {
+        // SIGKILL is used when we manually change tracks
+        if (signal !== 'SIGTERM' && signal !== 'SIGKILL' && onFinish) {
             onFinish();
         }
     });
 };
 
+export const togglePause = () => {
+    if (!currentProcess) return false;
+    
+    if (isPaused) {
+        currentProcess.kill('SIGCONT'); // Resume
+        isPaused = false;
+    } else {
+        currentProcess.kill('SIGSTOP'); // Pause
+        isPaused = true;
+    }
+    return isPaused;
+};
+
 export const stopSong = () => {
     if (currentProcess) {
-        currentProcess.kill();
+        currentProcess.kill('SIGKILL');
         currentProcess = null;
+        isPaused = false;
     }
 };
